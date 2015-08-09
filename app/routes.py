@@ -17,6 +17,7 @@ def unauthorized():
 def home():
     return render_template('home.html')
 
+# User Specific Areas
 @app.route('/rate')
 @login_required
 def rate():
@@ -27,6 +28,8 @@ def rate():
 def recommendations():
     return render_template('recommendations.html')
 
+
+# Signup, Login, Logout
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     form = SignUpForm()

@@ -55,5 +55,5 @@ class RatingsImport(Command):
             for rating in ratings_reader:
                 count += 1
                 print rating
-                if count <= 10:
+                if count > 10:
                     break

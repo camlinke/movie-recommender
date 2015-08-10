@@ -1,14 +1,14 @@
 """empty message
 
-Revision ID: 1e9bc48e4a5d
-Revises: 827f34967c9
-Create Date: 2015-08-08 21:28:33.129751
+Revision ID: 45592b7c4a13
+Revises: None
+Create Date: 2015-08-09 16:43:02.751769
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '1e9bc48e4a5d'
-down_revision = '827f34967c9'
+revision = '45592b7c4a13'
+down_revision = None
 
 from alembic import op
 import sqlalchemy as sa
@@ -19,13 +19,14 @@ def upgrade():
     op.create_table('genres',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('genre_name', sa.String(), nullable=True),
-    sa.Column('movie_id', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('genre_name')
+    sa.Column('movie_id', sa.String(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('movies',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('movie_id', sa.String(), nullable=True),
     sa.Column('name', sa.String(), nullable=True),
+    sa.Column('year', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     ### end Alembic commands ###

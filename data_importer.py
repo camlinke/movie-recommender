@@ -1,5 +1,5 @@
 from app import db
-from app.models import Movie, Genre
+from app.models import Movie, Genre, Rating
 from flask.ext.script import Command
 import csv
 import os
@@ -25,8 +25,8 @@ class MovieImport(Command):
 
                     if Movie.query.filter_by(movie_id=movie_id).first():
                         continue
-                    movie = Movie(movie_id=movie_id, name=movie_name, year=movie_year)
-                    db.session.add(movie)
+                    m = Movie(movie_id=movie_id, name=movie_name, year=movie_year)
+                    db.session.add(m)
 
                     if genres[0] != '(no genres listed)':
                         for genre in genres:
@@ -53,7 +53,21 @@ class RatingsImport(Command):
             next(ratings_reader, None)
             count = 0
             for rating in ratings_reader:
-                count += 1
-                print rating
-                if count > 10:
-                    break
+                try:
+                    movie_lense_user_id = rating[0]
+                    movie_id = rating[1]
+                    movie_rating = rating[2]
+                    timestamp = rating[3]
+                    if Rating.query.filter(Rating.movie_id == movie_id).filter(Rating.movie_lense_user_id == movie_lense_user_id).first():
+                        continue
+
+                    r = Rating(movie_id = movie_id,
+                               rating = movie_rating,
+                               timestamp = timestamp,
+                               movie_lense_user_id = movie_lense_user_id)
+                    db.session.add(r)
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    print rating
+                    print "error ", e

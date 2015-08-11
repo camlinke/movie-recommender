@@ -68,15 +68,15 @@ class Rating(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
-    movie_lense_user_id = db.Column(db.String())
-    movie_id = db.Column(db.String(), nullable=False)
+    movie_lense_user_id = db.Column(db.String(), index=True)
+    movie_id = db.Column(db.String(), nullable=False, index=True)
     rating = db.Column(db.String(), nullable=False)
     timestamp = db.Column(db.String(), nullable=False)
 
     def __init__(self, movie_id, rating, timestamp, user_id=None, movie_lense_user_id=None):
         self.movie_id = movie_id
         self.rating = rating
-        self.timestamp = timestampe
+        self.timestamp = timestamp
         self.user_id = user_id
         self.movie_lense_user_id = movie_lense_user_id
 

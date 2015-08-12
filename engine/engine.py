@@ -119,14 +119,11 @@ movieNameWithAvgRatingsRDD = (moviesRDD
 
 
 # Cosine Similarity for Individual Recommendations
-def dotprod(a, b):
-    return a.dot(b)
-
-def cosine_similarity(user1_ratings, user2_ratings):
+def cosine_similarity(user1, user2):
     """ Takes in two Dense Vectors of user's Recommendations and
         returns the cosine similarity between the two.
     """
-    return user1_ratings.dot(user2_ratings) / (math.sqrt(user1_ratings.dot(user1_ratings)) * math.sqrt(user2_ratings.dot(user2_ratings)))
+    return user1.dot(user2) / (math.sqrt(user1.dot(user1)) * math.sqrt(user2.dot(user2)))
 
 # Create sparse vectors grouped by usersId
 movies_length = moviesRDD.count()
@@ -136,16 +133,18 @@ userIDsWithRatingsRDD = (ratingsRDD
                          .map(lambda x: (x[0], Vectors.sparse(movies_length, x[1]))))
 
 crossUsers = userIDsWithRatingsRDD.cartesian(userIDsWithRatingsRDD).filter(lambda x: x[0] != x[1]).cache()
-print crossUsers.take(1)
-similarities = crossUsers.map(lambda x: (x[0][0], x[1][0], cosine_similarity(x[0][1], x[1][1]))).cache()
-print "here"
-print "here"
 
 def similarities_for_user(user_id):
-    return similarities.filter(lambda x: x[0] == int(user_id)).takeOrdered(10, lambda x: -x[2])
+    similarities = (crossUsers
+                    .filter(lambda x: x[0][0] == 1)
+                    .map(lambda x: (x[0][0], x[1][0], cosine_similarity(x[0][1], x[1][1]))))
+    return (similarities
+            .filter(lambda x: x[0] == int(user_id))
+            .takeOrdered(10, lambda x: -x[2]))
 
+print similarities_for_user(1)
 
-
+# get movies from similar people where user has not seen those movies
 
 
 

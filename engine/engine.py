@@ -1,6 +1,8 @@
 from pyspark import SparkContext
 from pyspark.mllib.recommendation import ALS
 from pyspark.mllib.linalg import Vectors
+import numpy as np
+import scipy.sparse as sps
 import sys
 import os
 import csv
@@ -126,7 +128,9 @@ def cosine_similarity(user1, user2):
     return user1.dot(user2) / (math.sqrt(user1.dot(user1)) * math.sqrt(user2.dot(user2)))
 
 # Create sparse vectors grouped by usersId
-movies_length = moviesRDD.count()
+# movies_length = ratingsRDD.count()
+movies_length = ratingsRDD.map(lambda x: x[1]).max() + 1
+
 userIDsWithRatingsRDD = (ratingsRDD
                          .map(lambda (user_id, movie_id, rating): (user_id, [(movie_id, rating)]))
                          .reduceByKey(lambda a, b: a + b)
@@ -134,19 +138,72 @@ userIDsWithRatingsRDD = (ratingsRDD
 
 crossUsers = userIDsWithRatingsRDD.cartesian(userIDsWithRatingsRDD).filter(lambda x: x[0] != x[1]).cache()
 
-def similarities_for_user(user_id):
-    similarities = (crossUsers
-                    .filter(lambda x: x[0][0] == 1)
+def similarities_for_user(user_id, crossRDD):
+    """
+    Takes in a user_id and and RDD of crossed user_ids with that user
+    Returns an array of the top 10 users who are most similar to a 
+    """
+    similarities = (crossRDD
+                    .filter(lambda x: x[0][0] == user_id)
                     .map(lambda x: (x[0][0], x[1][0], cosine_similarity(x[0][1], x[1][1]))))
     return (similarities
-            .filter(lambda x: x[0] == int(user_id))
-            .takeOrdered(10, lambda x: -x[2]))
+            .filter(lambda x: x[0] == int(user_id)))
 
-print similarities_for_user(1)
+def similarities_for_vector(user_id, user_data_rdd):
+    """
+    Takes in a tuple of form (user_id, sparse_vector_of_ratings) and combines it with existing
+    rating rdd. and returns cosine similarities for that user with existing users
+    sorted higheset to lowest
+    """
+    crossRDD = user_data_rdd.cartesian(userIDsWithRatingsRDD)
+    return similarities_for_user(user_id, crossRDD)
 
-# get movies from similar people where user has not seen those movies
+def create_user_with_sparse_ratings(user_id, ratings):
+    """
+    Creates a rdd with (user_id, sparse_vector_of_ratings) from a user_id and array of
+    (movie_id, rating) tuples.
+    """
+    return sc.parallelize([(user_id, Vectors.sparse(movies_length, ratings))])
 
+def create_id_rating_tuples(scalar, vector):
+    """
+    Takes in scalar and sparse vector multiplies them together and returns
+    (movie_id, rating) tuple
+    """
+    updated_ratings = vector.toArray().dot(scalar)
+    return [(i, rating) for i, rating in enumerate(updated_ratings) if rating != 0 ]
 
+fake_user_ratings = [(1, 5), (7, 3), (173, 2), (99, 1), (88, 5), (288, 5), (405, 3), (296, 5), (47, 5), (1432, 4)]
+user_seen_movies_list = [x[0] for x in fake_user_ratings]
+mostSimilarForUserRDD = similarities_for_vector(0, create_user_with_sparse_ratings(0, fake_user_ratings))
+
+# movie recommendataion score = similarity_rating * user_movie rating
+# create rdd of movie_id recommendation score
+
+similarUsersAndSimilarityRDD = mostSimilarForUserRDD.sortBy(lambda x: -x[2]).map(lambda x: (x[1], x[2]))
+# print (similarUsersAndSimilarityRDD
+#        .join(userIDsWithRatingsRDD)
+#        .map(lambda x: {movie_id : x[1][1][movie_id] * x[1][0] for movie_id in x[1][1]}))
+# print userIDsWithRatingsRDD.map(lambda x: x[1]).takeOrdered(1, lambda x: x[0])
+
+# print dir(userIDsWithRatingsRDD.map(lambda x: x[1]).takeOrdered(1, lambda x: x[0]))
+# print [x for x in userIDsWithRatingsRDD.map(lambda x: x[1]).takeOrdered(1, lambda x: x[0])[0]]
+# print dir(userIDsWithRatingsRDD.map(lambda x: x[1]).takeOrdered(1, lambda x: x[0])[0])
+# print create_id_rating_tuples(0.5, userIDsWithRatingsRDD.map(lambda x: x[1]).takeOrdered(1, lambda x: x[0])[0])
+
+topMoviesForUser = (userIDsWithRatingsRDD
+                   .join(similarUsersAndSimilarityRDD)
+                   .flatMap(lambda x: create_id_rating_tuples(x[1][1], x[1][0]))
+                   .reduceByKey(lambda a, b: max(a, b))
+                   .filter(lambda x: x[0] not in user_seen_movies_list)
+                   .takeOrdered(50, lambda x: -x[1]))
+
+# print userIDsWithRatingsRDD.map(lambda x: x[1]).map()
+
+# create (id, rating) tuples
+# flatmap?
+# reduce by key max(rating1, rating2)
+# filter where user hasn't seen movie
 
 
 

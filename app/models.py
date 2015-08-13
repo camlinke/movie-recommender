@@ -1,5 +1,6 @@
 from app import db
 from app import bcrypt
+from sqlalchemy.dialects.postgresql import JSON
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -7,6 +8,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(), unique=True)
     pw_hash = db.Column(db.String())
+    ratings = db.Column(JSON)
 
     def __init__(self, email, password):
         self.email = email

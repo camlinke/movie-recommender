@@ -181,15 +181,6 @@ mostSimilarForUserRDD = similarities_for_vector(0, create_user_with_sparse_ratin
 # create rdd of movie_id recommendation score
 
 similarUsersAndSimilarityRDD = mostSimilarForUserRDD.sortBy(lambda x: -x[2]).map(lambda x: (x[1], x[2]))
-# print (similarUsersAndSimilarityRDD
-#        .join(userIDsWithRatingsRDD)
-#        .map(lambda x: {movie_id : x[1][1][movie_id] * x[1][0] for movie_id in x[1][1]}))
-# print userIDsWithRatingsRDD.map(lambda x: x[1]).takeOrdered(1, lambda x: x[0])
-
-# print dir(userIDsWithRatingsRDD.map(lambda x: x[1]).takeOrdered(1, lambda x: x[0]))
-# print [x for x in userIDsWithRatingsRDD.map(lambda x: x[1]).takeOrdered(1, lambda x: x[0])[0]]
-# print dir(userIDsWithRatingsRDD.map(lambda x: x[1]).takeOrdered(1, lambda x: x[0])[0])
-# print create_id_rating_tuples(0.5, userIDsWithRatingsRDD.map(lambda x: x[1]).takeOrdered(1, lambda x: x[0])[0])
 
 topMoviesForUser = (userIDsWithRatingsRDD
                    .join(similarUsersAndSimilarityRDD)
@@ -199,11 +190,6 @@ topMoviesForUser = (userIDsWithRatingsRDD
                    .takeOrdered(50, lambda x: -x[1]))
 
 # print userIDsWithRatingsRDD.map(lambda x: x[1]).map()
-
-# create (id, rating) tuples
-# flatmap?
-# reduce by key max(rating1, rating2)
-# filter where user hasn't seen movie
 
 
 

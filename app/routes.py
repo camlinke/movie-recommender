@@ -2,8 +2,9 @@ from app import app, db, login_manager
 from flask import render_template, redirect, request, url_for
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from forms import SignUpForm, LoginForm
-from models import User
+from models import User, Movie
 from sqlalchemy.exc import IntegrityError
+import json
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -21,7 +22,17 @@ def home():
 @app.route('/rate')
 @login_required
 def rate():
-    return render_template('rate.html')
+    if current_user.ratings != None:
+        print [x[0] for x in current_user.ratings]
+    movies = Movie.query.filter(Movie.movie_id > "0").limit(25).all()
+    for m in movies:
+        print m
+    return render_template('rate.html', movies=movies)
+
+@app.route('/rate_movie/<movie_id>/<rating>', methods=['POST'])
+def rate_move(movie_id, rating):
+    
+    return "success"
 
 @app.route('/recommendations')
 @login_required

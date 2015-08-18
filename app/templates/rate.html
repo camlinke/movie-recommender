@@ -12,19 +12,31 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Star Wars: A New Hope</td>
-                            <td>
-                                <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
-                                <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
-                                <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
-                                <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
-                                <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
-                            </td>
-                        </tr>
+                        {% for movie in movies %}
+                            <tr>
+                                <td>{{ movie.name }}</td>
+                                <td>
+                                    <div class="br-wrapper br-theme-bootstrap-stars">
+                                        <select class="rate-movie">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 {% endblock content %}
+
+{# <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span> #}

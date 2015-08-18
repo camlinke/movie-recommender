@@ -33,13 +33,10 @@ def rate():
 
 @app.route('/rate_movie/<movie_id>/<rating>', methods=['POST'])
 @login_required
-def rate_move(movie_id, rating):
+def rate_movie(movie_id, rating):
     try:
-        print movie_id
-        print rating
         date_time = str(int(Delorean().epoch()))
         r = Rating.query.filter_by(user_id=current_user.id).filter(Rating.movie_id == movie_id).first()
-        print r
         if r:
             if rating == "0":
                 db.session.delete(r)

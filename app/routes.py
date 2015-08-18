@@ -2,9 +2,11 @@ from app import app, db, login_manager
 from flask import render_template, redirect, request, url_for
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from forms import SignUpForm, LoginForm
-from models import User, Movie
+from models import User, Movie, Rating
 from sqlalchemy.exc import IntegrityError
+from delorean import Delorean
 import json
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -22,9 +24,9 @@ def home():
 @app.route('/rate')
 @login_required
 def rate():
-    if current_user.ratings != None:
-        print [x[0] for x in current_user.ratings]
-    movies = Movie.query.filter(Movie.movie_id > "0").limit(25).all()
+    ratings = Rating.query.filter_by(user_id=current_user.id).all()
+    r = [rating.movie_id for rating in ratings]
+    movies = Movie.query.filter(~Movie.movie_id.in_(r)).limit(25).all()
     for m in movies:
         print m
     return render_template('rate.html', movies=movies)
@@ -32,12 +34,30 @@ def rate():
 @app.route('/rate_movie/<movie_id>/<rating>', methods=['POST'])
 @login_required
 def rate_move(movie_id, rating):
-    print movie_id
-    print rating
     try:
-        user = User.query.filter_by(id=current_user.id).first()
-        # user.ratings.
+        print movie_id
+        print rating
+        date_time = str(int(Delorean().epoch()))
+        r = Rating.query.filter_by(user_id=current_user.id).filter(Rating.movie_id == movie_id).first()
+        print r
+        if r:
+            if rating == "0":
+                db.session.delete(r)
+                db.session.commit()
+                return "success"
+            else:
+                r.rating = rating
+                r.timestamp = date_time
+        else:
+            r = Rating(user_id = current_user.id,
+                       movie_id = movie_id,
+                       rating = rating,
+                       timestamp = date_time)
+        db.session.add(r)
+        db.session.commit()
+        print "successfull added/updated rating"
     except IntegrityError:
+        db.session.rollback()
         print "error with rating"
     return "success"
 

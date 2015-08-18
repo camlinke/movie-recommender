@@ -31,7 +31,8 @@ def rate():
 
 @app.route('/rate_movie/<movie_id>/<rating>', methods=['POST'])
 def rate_move(movie_id, rating):
-    
+    print movie_id
+    print rating
     return "success"
 
 @app.route('/recommendations')

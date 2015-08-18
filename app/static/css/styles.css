@@ -20,3 +20,7 @@ body {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
+
+.br-widget {
+    padding-top: 5px;
+}

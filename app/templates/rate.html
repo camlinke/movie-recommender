@@ -16,8 +16,9 @@
                             <tr>
                                 <td>{{ movie.name }}</td>
                                 <td>
-                                    <div class="br-wrapper br-theme-bootstrap-stars">
+                                    <div class="br-wrapper br-theme-bootstrap-stars movie-rating" data-movie-id="{{ movie.movie_id }}">
                                         <select class="rate-movie">
+                                            <option value></option>
                                             <option value="1">1</option>
                                             <option value="2">2</option>
                                             <option value="3">3</option>

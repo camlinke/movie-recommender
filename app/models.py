@@ -8,7 +8,6 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(), unique=True)
     pw_hash = db.Column(db.String())
-    ratings = db.Column(JSON)
 
     def __init__(self, email, password):
         self.email = email
@@ -69,7 +68,7 @@ class Rating(db.Model):
     __tablename__ = "ratings"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, index=True)
     movie_lense_user_id = db.Column(db.String(), index=True)
     movie_id = db.Column(db.String(), nullable=False, index=True)
     rating = db.Column(db.String(), nullable=False)

@@ -30,9 +30,15 @@ def rate():
     return render_template('rate.html', movies=movies)
 
 @app.route('/rate_movie/<movie_id>/<rating>', methods=['POST'])
+@login_required
 def rate_move(movie_id, rating):
     print movie_id
     print rating
+    try:
+        user = User.query.filter_by(id=current_user.id).first()
+        # user.ratings.
+    except IntegrityError:
+        print "error with rating"
     return "success"
 
 @app.route('/recommendations')

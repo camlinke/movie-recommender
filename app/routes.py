@@ -4,8 +4,10 @@ from flask.ext.login import login_user, logout_user, login_required, current_use
 from forms import SignUpForm, LoginForm
 from models import User, Movie, Rating
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql.expression import func
 from delorean import Delorean
 import json
+import random
 
 
 @login_manager.user_loader
@@ -26,9 +28,13 @@ def home():
 def rate():
     ratings = Rating.query.filter_by(user_id=current_user.id).all()
     r = [rating.movie_id for rating in ratings]
-    movies = Movie.query.filter(~Movie.movie_id.in_(r)).limit(25).all()
-    for m in movies:
-        print m
+    count = Movie.query.count()
+    random_num = random.randint(1, 100)
+    random_range = [x for x in xrange(count) if x % random_num == 0]
+    # rand_num = random.randrange(50, count)
+    # random_range = range(rand_num-50, rand_num)
+    movies = Movie.query.filter(~Movie.movie_id.in_(r)).filter(Movie.id.in_(random_range)).limit(25).all()
+    random.shuffle(movies)
     return render_template('rate.html', movies=movies)
 
 @app.route('/rate_movie/<movie_id>/<rating>', methods=['POST'])

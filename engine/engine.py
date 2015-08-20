@@ -1,12 +1,15 @@
 from pyspark import SparkContext
 from pyspark.mllib.recommendation import ALS
 from pyspark.mllib.linalg import Vectors
+from app.models import User, Rating
+from app import app, db
 import numpy as np
 import scipy.sparse as sps
 import sys
 import os
 import csv
 import math
+import json
 
 sc = SparkContext()
 
@@ -15,19 +18,99 @@ large_ratings = os.path.join('file:/Users/camlinke/Dropbox/780/projects/movie-re
 
 small_movies = os.path.join('file:/Users/camlinke/Dropbox/780/projects/movie-recommender/ml_data/ml-latest-small/movies.csv')
 large_movies = os.path.join('file:/Users/camlinke/Dropbox/780/projects/movie-recommender/ml_data/ml-latest/ratings.csv')
+app.config.from_object(os.environ['APP_SETTINGS'])
 
 # ratingsRDD = rawRatings.map
 
+# class RatingEngine:
+    
+#     def __init__(self, ratings_rdd, user_ratings):
+#         self.ratings_rdd = ratings_rdd
+#         self.user_ratings = user_ratings
+
+#     # Cosine Similarity for Individual Recommendations
+#     def cosine_similarity(self, user1, user2):
+#         """ Takes in two Dense Vectors of user's Recommendations and
+#             returns the cosine similarity between the two.
+#         """
+#         return user1.dot(user2) / (math.sqrt(user1.dot(user1)) * math.sqrt(user2.dot(user2)))
+
+#     # Create sparse vectors grouped by usersId
+#     # movies_length = ratingsRDD.count()
+
+#     def similarities_for_user(self, user_id, crossRDD):
+#         """
+#         Takes in a user_id and and RDD of crossed user_ids with that user
+#         Returns an array of the top 10 users who are most similar to a 
+#         """
+#         similarities = (crossRDD
+#                         .filter(lambda x: x[0][0] == user_id)
+#                         .map(lambda x: (x[0][0], x[1][0], self.cosine_similarity(x[0][1], x[1][1]))))
+#         return (similarities
+#                 .filter(lambda x: x[0] == int(user_id)))
+
+#     def similarities_for_vector(self, user_id, user_data_rdd, user_ids_with_ratings_rdd):
+#         """
+#         Takes in a tuple of form (user_id, sparse_vector_of_ratings) and combines it with existing
+#         rating rdd. and returns cosine similarities for that user with existing users
+#         sorted higheset to lowest
+#         """
+#         cross_rdd = user_data_rdd.cartesian(user_ids_with_ratings_rdd)
+#         return self.similarities_for_user(user_id, cross_rdd)
+
+#     def create_user_with_sparse_ratings(self, user_id, ratings, movies_length):
+#         """
+#         Creates a rdd with (user_id, sparse_vector_of_ratings) from a user_id and array of
+#         (movie_id, rating) tuples.
+#         """
+#         return sc.parallelize([(user_id, Vectors.sparse(movies_length, ratings))])
+
+#     def create_id_rating_tuples(self, scalar, vector):
+#         """
+#         Takes in scalar and sparse vector multiplies them together and returns
+#         (movie_id, rating) tuple
+#         """
+#         updated_ratings = vector.toArray().dot(scalar)
+#         return [(i, rating) for i, rating in enumerate(updated_ratings) if rating != 0]
+
+#     def create_most_similar_for_user_rdd(self, user_ratings, user_ids_with_ratings_rdd, movies_length):
+#         return self.similarities_for_vector(0, self.create_user_with_sparse_ratings(0, user_ratings, movies_length), user_ids_with_ratings_rdd)
+
+#     def create_similar_users_and_similarity_rdd(self, mostSimilarForUserRDD):
+#         return mostSimilarForUserRDD.sortBy(lambda x: -x[2]).map(lambda x: (x[1], x[2]))
+
+#     def get_top_movies_for_user(self):
+#         movies_length = self.ratings_rdd.map(lambda x: x[1]).max() + 1
+#         user_ids_with_ratings_rdd = (self.ratings_rdd
+#                                      .map(lambda (user_id, movie_id, rating): (user_id, [(movie_id, rating)]))
+#                                      .reduceByKey(lambda a, b: a + b)
+#                                      .map(lambda x: (x[0], Vectors.sparse(movies_length, x[1]))))
+#         user_seen_movies_list = [x[0] for x in self.user_ratings]
+#         most_similar_for_user_rdd = self.create_most_similar_for_user_rdd(self.user_ratings, user_ids_with_ratings_rdd, movies_length)
+#         similar_users_and_similarity_rdd = self.create_similar_users_and_similarity_rdd(most_similar_for_user_rdd)
+#         top_movies_for_user = (user_ids_with_ratings_rdd
+#                            .join(similar_users_and_similarity_rdd)
+#                            .flatMap(lambda x: self.create_id_rating_tuples(x[1][1], x[1][0]))
+#                            .reduceByKey(lambda a, b: max(a, b))
+#                            .filter(lambda x: x[0] not in user_seen_movies_list)
+#                            .takeOrdered(50, lambda x: -x[1]))
+#         return top_movies_for_user
+
+
+
 num_partitions = 2
+user_id = None
 
 if len(sys.argv) > 0:
     for arg in sys.argv:
         if arg == "large":
             raw_ratings = sc.textFile(large_ratings).repartition(num_partitions)
             raw_movies = sc.textFile(large_movies)
-        else:
+        if arg == "small":
             raw_ratings = sc.textFile(small_ratings).repartition(num_partitions)
             raw_movies = sc.textFile(small_movies)
+        if arg[:3] == "id:":
+            user_id = arg[3:]
 else:
     raw_ratings = sc.textFile(small_ratings).repartition(num_partitions)
     raw_movies = sc.textFile(small_movies)
@@ -119,6 +202,20 @@ movieNameWithAvgRatingsRDD = (moviesRDD
 # print 'The model had a RMSE on the test set of %s' % testRMSE
 
 
+fake_user_ratings = [(1, 5), (7, 3), (173, 2), (99, 1), (88, 5), (288, 5), (405, 3), (296, 5), (47, 5), (1432, 4)]
+user_seen_movies_list = [x[0] for x in fake_user_ratings]
+# mostSimilarForUserRDD = similarities_for_vector(0, create_user_with_sparse_ratings(0, fake_user_ratings))
+
+# movie recommendataion score = similarity_rating * user_movie rating
+# create rdd of movie_id recommendation score
+
+# mostSimilarForUserRDD = create_most_similar_for_user_rdd(fake_user_ratings)
+# similarUsersAndSimilarityRDD = create_similar_users_and_similarity_rdd(mostSimilarForUserRDD)
+
+# print get_most_similar_for_user(userIDsWithRatingsRDD, similarUsersAndSimilarityRDD, user_seen_movies_list)
+# print userIDsWithRatingsRDD.map(lambda x: x[1]).map()
+
+# crossUsers = userIDsWithRatingsRDD.cartesian(userIDsWithRatingsRDD).filter(lambda x: x[0] != x[1]).cache()
 
 # Cosine Similarity for Individual Recommendations
 def cosine_similarity(user1, user2):
@@ -129,14 +226,6 @@ def cosine_similarity(user1, user2):
 
 # Create sparse vectors grouped by usersId
 # movies_length = ratingsRDD.count()
-movies_length = ratingsRDD.map(lambda x: x[1]).max() + 1
-
-userIDsWithRatingsRDD = (ratingsRDD
-                         .map(lambda (user_id, movie_id, rating): (user_id, [(movie_id, rating)]))
-                         .reduceByKey(lambda a, b: a + b)
-                         .map(lambda x: (x[0], Vectors.sparse(movies_length, x[1]))))
-
-crossUsers = userIDsWithRatingsRDD.cartesian(userIDsWithRatingsRDD).filter(lambda x: x[0] != x[1]).cache()
 
 def similarities_for_user(user_id, crossRDD):
     """
@@ -149,16 +238,16 @@ def similarities_for_user(user_id, crossRDD):
     return (similarities
             .filter(lambda x: x[0] == int(user_id)))
 
-def similarities_for_vector(user_id, user_data_rdd):
+def similarities_for_vector(user_id, user_data_rdd, user_ids_with_ratings_rdd):
     """
     Takes in a tuple of form (user_id, sparse_vector_of_ratings) and combines it with existing
     rating rdd. and returns cosine similarities for that user with existing users
     sorted higheset to lowest
     """
-    crossRDD = user_data_rdd.cartesian(userIDsWithRatingsRDD)
-    return similarities_for_user(user_id, crossRDD)
+    cross_rdd = user_data_rdd.cartesian(user_ids_with_ratings_rdd)
+    return similarities_for_user(user_id, cross_rdd)
 
-def create_user_with_sparse_ratings(user_id, ratings):
+def create_user_with_sparse_ratings(user_id, ratings, movies_length):
     """
     Creates a rdd with (user_id, sparse_vector_of_ratings) from a user_id and array of
     (movie_id, rating) tuples.
@@ -171,28 +260,48 @@ def create_id_rating_tuples(scalar, vector):
     (movie_id, rating) tuple
     """
     updated_ratings = vector.toArray().dot(scalar)
-    return [(i, rating) for i, rating in enumerate(updated_ratings) if rating != 0 ]
+    return [(i, rating) for i, rating in enumerate(updated_ratings) if rating != 0]
 
-fake_user_ratings = [(1, 5), (7, 3), (173, 2), (99, 1), (88, 5), (288, 5), (405, 3), (296, 5), (47, 5), (1432, 4)]
-user_seen_movies_list = [x[0] for x in fake_user_ratings]
-mostSimilarForUserRDD = similarities_for_vector(0, create_user_with_sparse_ratings(0, fake_user_ratings))
+def create_most_similar_for_user_rdd(user_ratings, user_ids_with_ratings_rdd, movies_length):
+    return similarities_for_vector(0, create_user_with_sparse_ratings(0, user_ratings, movies_length), user_ids_with_ratings_rdd)
 
-# movie recommendataion score = similarity_rating * user_movie rating
-# create rdd of movie_id recommendation score
+def create_similar_users_and_similarity_rdd(mostSimilarForUserRDD):
+    return mostSimilarForUserRDD.sortBy(lambda x: -x[2]).map(lambda x: (x[1], x[2]))
 
-similarUsersAndSimilarityRDD = mostSimilarForUserRDD.sortBy(lambda x: -x[2]).map(lambda x: (x[1], x[2]))
+def get_top_movies_for_user(user_ratings=fake_user_ratings, ratings_rdd=ratingsRDD):
+    movies_length = ratings_rdd.map(lambda x: x[1]).max() + 1
+    user_ids_with_ratings_rdd = (ratings_rdd
+                                 .map(lambda (user_id, movie_id, rating): (user_id, [(movie_id, rating)]))
+                                 .reduceByKey(lambda a, b: a + b)
+                                 .map(lambda x: (x[0], Vectors.sparse(movies_length, x[1]))))
+    user_seen_movies_list = [x[0] for x in user_ratings]
+    most_similar_for_user_rdd = create_most_similar_for_user_rdd(user_ratings, user_ids_with_ratings_rdd, movies_length)
+    similar_users_and_similarity_rdd = create_similar_users_and_similarity_rdd(most_similar_for_user_rdd)
+    top_movies_for_user = (user_ids_with_ratings_rdd
+                       .join(similar_users_and_similarity_rdd)
+                       .flatMap(lambda x: create_id_rating_tuples(x[1][1], x[1][0]))
+                       .reduceByKey(lambda a, b: max(a, b))
+                       .filter(lambda x: x[0] not in user_seen_movies_list)
+                       .takeOrdered(50, lambda x: -x[1]))
+    return top_movies_for_user
 
-topMoviesForUser = (userIDsWithRatingsRDD
-                   .join(similarUsersAndSimilarityRDD)
-                   .flatMap(lambda x: create_id_rating_tuples(x[1][1], x[1][0]))
-                   .reduceByKey(lambda a, b: max(a, b))
-                   .filter(lambda x: x[0] not in user_seen_movies_list)
-                   .takeOrdered(50, lambda x: -x[1]))
 
-# print userIDsWithRatingsRDD.map(lambda x: x[1]).map()
+# print get_top_movies_for_user(fake_user_ratings, ratingsRDD)
 
 
-
+try:
+    if user_id != None:
+        user = User.query.filter_by(id=user_id).first()
+        if user:
+            ratings = Rating.query.filter(Rating.user_id == user.id).all()
+            user_ratings = [(int(rating.movie_id), int(rating.rating)) for rating in ratings]
+            recommendations = {key: value for key, value in get_top_movies_for_user(user_ratings=user_ratings)}
+            user.recommendations = json.dumps(recommendations)
+            db.session.add(user)
+            db.session.commit()
+except Exception as e:
+    print e
+    print "didn't work"
 
 
 

@@ -12,10 +12,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Star Wars: A New Hope</td>
-                            <td>*****</td>
-                        </tr>
+                        {% for movie in movies %}
+                            <tr>
+                                <td>{{ movie.name }}</td>
+                                <td>*****</td>
+                            </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>

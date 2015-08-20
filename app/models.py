@@ -8,6 +8,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(), unique=True)
     pw_hash = db.Column(db.String())
+    recommendations = db.Column(JSON)
 
     def __init__(self, email, password):
         self.email = email

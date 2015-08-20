@@ -8,6 +8,7 @@ from sqlalchemy.sql.expression import func
 from delorean import Delorean
 import json
 import random
+import subprocess
 
 
 @login_manager.user_loader
@@ -67,7 +68,13 @@ def rate_movie(movie_id, rating):
 @app.route('/recommendations')
 @login_required
 def recommendations():
-    return render_template('recommendations.html')
+    subprocess.call(["pyspark", "engine/engine.py", "small", "id:{}".format(current_user.id)])
+    u = User.query.filter_by(id=current_user.id).first()
+    ids = [x for x in json.loads(u.recommendations)]
+    movies = Movie.query.filter(Movie.movie_id.in_(ids)).limit(25)
+    for movie in movies:
+        print movie
+    return render_template('recommendations.html', movies=movies)
 
 
 # Signup, Login, Logout

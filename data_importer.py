@@ -71,3 +71,21 @@ class RatingsImport(Command):
                     db.session.rollback()
                     print rating
                     print "error ", e
+
+class ImportURLs(Command):
+    def run(self):
+        with open("{}/ml-latest/links.csv".format(os.environ["MOVIE_DATA_LOCATION"]), "r") as url_file:
+            url_reader = csv.reader(url_file, delimiter=',')
+            next(url_reader, None)
+            for movie_id, imdb_id, tmdb_id in url_reader:
+                try:
+                    movie = Movie.query.filter(Movie.movie_id == movie_id).first()
+                    if movie:
+                        movie.movie_id = movie_id
+                        movie.imdb_id = imdb_id
+                        movie.tmdb_id = tmdb_id
+                        db.session.add(movie)
+                        db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    print "error ", e

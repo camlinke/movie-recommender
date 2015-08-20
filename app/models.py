@@ -42,8 +42,10 @@ class Movie(db.Model):
     movie_id = db.Column(db.String())
     name = db.Column(db.String())
     year = db.Column(db.Integer())
+    imdb_id = db.Column(db.String())
+    tmdb_id = db.Column(db.String())
 
-    def __init__(self, name, movie_id, year):
+    def __init__(self, name, movie_id, year, imdb_id=None, tmdb_id=None):
         self.name = name
         self.movie_id = movie_id
         self.year = year

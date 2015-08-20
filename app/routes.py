@@ -68,12 +68,17 @@ def rate_movie(movie_id, rating):
 @app.route('/recommendations')
 @login_required
 def recommendations():
-    subprocess.call(["pyspark", "engine/engine.py", "small", "id:{}".format(current_user.id)])
     u = User.query.filter_by(id=current_user.id).first()
-    ids = [x for x in json.loads(u.recommendations)]
-    movies = Movie.query.filter(Movie.movie_id.in_(ids)).limit(25)
-    for movie in movies:
-        print movie
+    ratings = Rating.query.filter_by(user_id=current_user.id).all()
+    movies = []
+    if u.recommendations:
+        ids = [x for x in json.loads(u.recommendations)]
+        r = [rating.movie_id for rating in ratings]
+        movies = Movie.query.filter(Movie.movie_id.in_(ids)).filter(~Movie.movie_id.in_(r)).limit(25)
+    elif len(ratings) < 10:
+        return redirect(url_for('rate'))
+    else:
+        subprocess.call(["pyspark", "engine/engine.py", "small", "id:{}".format(current_user.id)])
     return render_template('recommendations.html', movies=movies)
 
 

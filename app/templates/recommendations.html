@@ -8,14 +8,25 @@
                     <thead>
                         <tr>
                             <th>Movie Name</th>
-                            <th>Rating</th>
+                            <th>Rate</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for movie in movies %}
                             <tr>
                                 <td>{{ movie.name }}</td>
-                                <td>*****</td>
+                                <td>
+                                    <div class="br-wrapper br-theme-bootstrap-stars movie-rating" data-movie-id="{{ movie.movie_id }}">
+                                        <select class="rate-movie">
+                                            <option value></option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                        </select>
+                                    </div>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>

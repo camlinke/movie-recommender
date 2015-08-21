@@ -1,8 +1,8 @@
 from pyspark import SparkContext
 from pyspark.mllib.recommendation import ALS
 from pyspark.mllib.linalg import Vectors
-from app.models import User, Rating
-from app import app, db
+# from app.models import User, Rating
+# from app import app, db
 import numpy as np
 import scipy.sparse as sps
 import sys
@@ -10,6 +10,7 @@ import os
 import csv
 import math
 import json
+import requests
 
 sc = SparkContext()
 
@@ -18,7 +19,7 @@ large_ratings = os.path.join('file:/Users/camlinke/Dropbox/780/projects/movie-re
 
 small_movies = os.path.join('file:/Users/camlinke/Dropbox/780/projects/movie-recommender/ml_data/ml-latest-small/movies.csv')
 large_movies = os.path.join('file:/Users/camlinke/Dropbox/780/projects/movie-recommender/ml_data/ml-latest/ratings.csv')
-app.config.from_object(os.environ['APP_SETTINGS'])
+# app.config.from_object(os.environ['APP_SETTINGS'])
 
 # ratingsRDD = rawRatings.map
 
@@ -289,22 +290,26 @@ def get_top_movies_for_user(user_ratings=fake_user_ratings, ratings_rdd=ratingsR
 # print get_top_movies_for_user(fake_user_ratings, ratingsRDD)
 
 
-try:
-    if user_id != None:
-        user = User.query.filter_by(id=user_id).first()
-        if user:
-            ratings = Rating.query.filter(Rating.user_id == user.id).all()
-            user_ratings = [(int(rating.movie_id), int(rating.rating)) for rating in ratings]
-            recommendations = {key: value for key, value in get_top_movies_for_user(user_ratings=user_ratings)}
-            user.recommendations = json.dumps(recommendations)
-            db.session.add(user)
-            db.session.commit()
-except Exception as e:
-    print e
-    print "didn't work"
+# try:
+#     if user_id != None:
+#         user = User.query.filter_by(id=user_id).first()
+#         if user:
+#             ratings = Rating.query.filter(Rating.user_id == user.id).all()
+#             user_ratings = [(int(rating.movie_id), int(rating.rating)) for rating in ratings]
+#             recommendations = {key: value for key, value in get_top_movies_for_user(user_ratings=user_ratings)}
+#             user.recommendations = json.dumps(recommendations)
+#             db.session.add(user)
+#             db.session.commit()
+# except Exception as e:
+#     print e
+#     print "didn't work"
 
+ratings = requests.get('http://localhost:5000/api/users/{}'.format(user_id)).json()['ratings']
 
-
+user_ratings = [(int(id), int(rating)) for id, rating in ratings]
+recommendations = {key: value for key, value in get_top_movies_for_user(user_ratings=user_ratings)}
+r = requests.post('http://localhost:5000/api/users/{}'.format(user_id), data=json.dumps({"recommendations" : recommendations}))
+print r.text
 
 
 

@@ -130,3 +130,31 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+# API
+@app.route('/api/users/<user_id>', methods=['GET', 'POST'])
+def api_get_user(user_id):
+    user = User.query.filter_by(id=user_id).first()
+    if user:
+        # If information is being posted add to user
+        if request.method == 'POST':
+            data = json.loads(request.data)
+            if 'recommendations' in data:
+                try:
+                    user.recommendations = json.dumps(data['recommendations'])
+                    db.session.add(user)
+                    db.session.commit()
+                except IntegrityError:
+                    db.session.rollback
+                    print "unable to add recommendations"
+
+        ratings = Rating.query.filter(Rating.user_id == user_id).all()
+        r = [(rating.movie_id, rating.rating) for rating in ratings]
+        return json.dumps({
+            "id" : user.id,
+            "email" : user.email,
+            "ratings" : r,
+            "recommendations" : user.recommendations
+        }), 200
+    else:
+        return 404

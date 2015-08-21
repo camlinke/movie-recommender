@@ -1,5 +1,5 @@
 from app import app, db, login_manager
-from flask import render_template, redirect, request, url_for
+from flask import render_template, redirect, request, url_for, g
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from forms import SignUpForm, LoginForm
 from models import User, Movie, Rating
@@ -18,6 +18,10 @@ def load_user(user_id):
 @login_manager.unauthorized_handler
 def unauthorized():
     return redirect(url_for('signup'))
+
+@app.before_request
+def before_request():
+    g.user = current_user
 
 @app.route('/')
 def home():
@@ -73,6 +77,7 @@ def recommendations():
     movies = []
     if u.recommendations:
         ids = [x for x in json.loads(u.recommendations)]
+        print u.recommendations
         r = [rating.movie_id for rating in ratings]
         movies = Movie.query.filter(Movie.movie_id.in_(ids)).filter(~Movie.movie_id.in_(r)).limit(25)
     elif len(ratings) < 10:

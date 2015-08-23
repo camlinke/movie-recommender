@@ -279,37 +279,19 @@ def get_top_movies_for_user(user_ratings=fake_user_ratings, ratings_rdd=ratingsR
     most_similar_for_user_rdd = create_most_similar_for_user_rdd(user_ratings, user_ids_with_ratings_rdd, movies_length)
     similar_users_and_similarity_rdd = create_similar_users_and_similarity_rdd(most_similar_for_user_rdd)
     top_movies_for_user = (user_ids_with_ratings_rdd
-                       .join(similar_users_and_similarity_rdd)
-                       .flatMap(lambda x: create_id_rating_tuples(x[1][1], x[1][0]))
-                       .reduceByKey(lambda a, b: max(a, b))
-                       .filter(lambda x: x[0] not in user_seen_movies_list)
-                       .takeOrdered(50, lambda x: -x[1]))
+                           .join(similar_users_and_similarity_rdd)
+                           .flatMap(lambda x: create_id_rating_tuples(x[1][1], x[1][0]))
+                           .reduceByKey(lambda a, b: max(a, b))
+                           .filter(lambda x: x[0] not in user_seen_movies_list)
+                           .takeOrdered(50, lambda x: -x[1]))
     return top_movies_for_user
 
-
-# print get_top_movies_for_user(fake_user_ratings, ratingsRDD)
-
-
-# try:
-#     if user_id != None:
-#         user = User.query.filter_by(id=user_id).first()
-#         if user:
-#             ratings = Rating.query.filter(Rating.user_id == user.id).all()
-#             user_ratings = [(int(rating.movie_id), int(rating.rating)) for rating in ratings]
-#             recommendations = {key: value for key, value in get_top_movies_for_user(user_ratings=user_ratings)}
-#             user.recommendations = json.dumps(recommendations)
-#             db.session.add(user)
-#             db.session.commit()
-# except Exception as e:
-#     print e
-#     print "didn't work"
 
 ratings = requests.get('http://localhost:5000/api/users/{}'.format(user_id)).json()['ratings']
 
 user_ratings = [(int(id), int(rating)) for id, rating in ratings]
 recommendations = {key: value for key, value in get_top_movies_for_user(user_ratings=user_ratings)}
 r = requests.post('http://localhost:5000/api/users/{}'.format(user_id), data=json.dumps({"recommendations" : recommendations}))
-print r.text
 
 
 

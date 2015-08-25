@@ -1,4 +1,4 @@
-from app import app, db, login_manager
+from app import app, db, login_manager, rq, redis_conn
 from flask import render_template, redirect, request, url_for, g
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from forms import SignUpForm, LoginForm
@@ -10,6 +10,8 @@ import json
 import random
 import subprocess
 
+def get_recommendations_for_user(user_id):
+    subprocess.call(["spark-submit", "engine/engine.py", "small", "id:{}".format(user_id)])
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -83,7 +85,8 @@ def recommendations():
     elif len(ratings) < 10:
         return redirect(url_for('rate'))
     else:
-        subprocess.call(["pyspark", "engine/engine.py", "small", "id:{}".format(current_user.id)])
+        job = rq.enqueue_call(func=get_recommendations_for_user, args=(current_user.id,), timeout=2000)
+        print job.get_id()
     return render_template('recommendations.html', movies=movies)
 
 

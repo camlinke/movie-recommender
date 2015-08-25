@@ -36,17 +36,15 @@ else:
     raw_ratings = sc.textFile(small_ratings).repartition(num_partitions)
     raw_movies = sc.textFile(small_movies)
 
-header = raw_ratings.first()
-ratingsRDD = raw_ratings.filter(lambda line: line != header).map(get_ratings_tuple).cache()
-
 fake_user_ratings = [(1, 5), (7, 3), (173, 2), (99, 1), (88, 5), (288, 5), (405, 3), (296, 5), (47, 5), (1432, 4)]
 user_seen_movies_list = [x[0] for x in fake_user_ratings]
-
 
 def get_ratings_tuple(entry):
     items = entry.split(',')
     return int(items[0]), int(items[1]), float(items[2])
 
+header = raw_ratings.first()
+ratingsRDD = raw_ratings.filter(lambda line: line != header).map(get_ratings_tuple).cache()
 
 # Cosine Similarity for Individual Recommendations
 def cosine_similarity(user1, user2):

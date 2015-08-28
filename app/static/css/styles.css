@@ -24,3 +24,7 @@ body {
 .br-widget {
     padding-top: 5px;
 }
+
+.rate-movie {
+    float: left;
+}

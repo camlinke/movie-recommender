@@ -71,6 +71,27 @@ def rate_movie(movie_id, rating):
         print "error with rating"
     return "success"
 
+@app.route('/ignore_movie/<movie_id>', methods=['POST'])
+@login_required
+def ignore_movie(movie_id):
+    try:
+        date_time = str(int(Delorean().epoch()))
+        r = Rating.query.filter_by(user_id=current_user.id).filter(Rating.movie_id == movie_id).first()
+        if r:
+            r.rating = "0"
+        else:
+            r = Rating(user_id = current_user.id, 
+                       movie_id = movie_id,
+                       rating = "0",
+                       timestamp = date_time)
+        db.session.add(r)
+        db.session.commit()
+        print "success ignoring"
+    except IntegrityError:
+        db.session.rollback()
+        print "error with ignoring"
+    return "success"
+
 @app.route('/recommendations')
 @login_required
 def recommendations():

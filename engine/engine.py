@@ -111,7 +111,7 @@ def get_top_movies_for_user(user_ratings=fake_user_ratings, ratings_rdd=ratingsR
                            .flatMap(lambda x: create_id_rating_tuples(x[1][1], x[1][0]))
                            .filter(lambda x: x[0] not in user_seen_movies_list)
                            .reduceByKey(lambda a, b: max(a, b))
-                           .takeOrdered(50, lambda x: -x[1]))
+                           .takeOrdered(100, lambda x: -x[1]))
     return top_movies_for_user
 
 

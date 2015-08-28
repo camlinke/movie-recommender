@@ -9,6 +9,7 @@
                         <tr>
                             <th>Movie Name</th>
                             <th>Rate</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -17,15 +18,20 @@
                                 <td><a href="http://www.imdb.com/title/tt{{ movie.imdb_id }}" target="_blank">{{ movie.name }}</a></td>
                                 <td>
                                     <div class="br-wrapper br-theme-bootstrap-stars movie-rating" data-movie-id="{{ movie.movie_id }}">
-                                        <select class="rate-movie">
-                                            <option value></option>
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                        </select>
+                                        <div class="row">
+                                            <select class="rate-movie col-md-5">
+                                                <option value></option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
                                     </div>
+                                </td>
+                                <td>
+                                    <a href="" data-movie-id="{{ movie.movie_id }}" class="ignore-movie">Ignore</a>
                                 </td>
                             </tr>
                         {% endfor %}

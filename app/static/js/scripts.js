@@ -12,4 +12,13 @@ $(document).ready(function() {
       }
     });
   });
+
+  $(function() {
+    $('.ignore-movie').click(function(e) {
+      e.preventDefault();
+      movieId = $(this).data("movie-id");
+      $.post("/ignore_movie/" + movieId);
+      $(this).closest('tr').remove();
+    })
+  })
 });

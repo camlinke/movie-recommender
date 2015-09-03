@@ -3,21 +3,32 @@
     <div class="container main">
         <div class="row">
             <div class="col-md-12">
-                home
-                {# <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Movie Name</th>
-                            <th>Rating</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Star Wars: A New Hope</td>
-                            <td>*****</td>
-                        </tr>
-                    </tbody>
-                </table> #}
+                <h1>Welcome to Movie-Recommender</h1>
+                <p>
+                    This is my attempt at using what I learned in two recent Spark courses I took on EDx and put them into use in a production system. In this case I used the data from MovieLense to recommend movies based on user ratings. Ratings were created by creating cosine simlilarity scores for users against each other. For the most similar users in the dataset each movie they rated is then multiplied by their cosine similarity score to give the top rated movies for the user. This is then stored as JSON in a Postgres database and displayed to the user.
+                </p>
+                <h3>A few notes:</h3>
+                <ul>
+                    <li>Currently I'm just running the scores against the small MovieLense dataset so my amazon bills on this stay near zero. If for some reason you want me to run your scores against the large dataset let me know.</li>
+                    <li>If you don't want to user your email address when you sign up you can put in a username, or whatever you want for that field, I'm not error checking it.</li>
+                    <li>Sorry for the generic bootstrap design, my goal was to spend no time on design ;).</li>
+                </ul>
+                <p>
+                    If you're interested in hearing more about how I built it, <a href="mailto:cam.linke@gmail.com">reach out</a>, I'd love to chat. You can find out more about me at <a href="http://camlinke.com">camlinke.com</a>
+                </p>
+                <h3>Some of libraries I used</h3>
+                <ul>
+                    <li>Spark - Used PySpark to create the recommendations</li>
+                    <li>Flask - Light python web framework</li>
+                    <li>SQLAlchemy - ORM</li>
+                    <li>Bcrypt - Encrypt passwords</li>
+                    <li>Delorean - Eliminated datetime headaches</li>
+                    <li>Flask-Login - Login/Out for Flask</li>
+                    <li>Flask-Migrate - Easy migrations for Flask and SQLAlchemy using Alembic</li>
+                    <li>Flask-WTF - Forms made easy for Flask</li>
+                    <li>Jinja2 - Templating engine, comes built in with Flask.</li>
+                    <li>RQ - Job queue for generating recommendations in background</li>
+                </ul>
             </div>
         </div>
     </div>

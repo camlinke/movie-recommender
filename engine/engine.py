@@ -116,7 +116,7 @@ def get_top_movies_for_user(user_ratings=fake_user_ratings, ratings_rdd=ratingsR
 
 
 ratings = requests.get('http://localhost:5000/api/users/{}'.format(user_id)).json()['ratings']
-user_ratings = [(int(id), int(rating)) for id, rating in ratings]
+user_ratings = [(int(id), int(rating)) for id, rating in ratings if rating != 0]
 recommendations = {key: value for key, value in get_top_movies_for_user(user_ratings=user_ratings)}
 r = requests.post('http://localhost:5000/api/users/{}'.format(user_id), data=json.dumps({"recommendations" : recommendations}))
 print r.text

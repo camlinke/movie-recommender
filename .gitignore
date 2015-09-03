@@ -58,3 +58,10 @@ target/
 
 # My Stuff
 ml_data
+
+# AWS
+.elasticbeanstalk
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

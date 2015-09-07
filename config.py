@@ -7,6 +7,7 @@ class Config(object):
 
 
 class ProductionConfig(Config):
+    DEBUG = True
     WTF_CSRF_ENABLED = True
     SECRET_KEY = os.environ['SECRET_KEY']
     SQLALCHEMY_DATABASE_URI = os.environ['SQLALCHEMY_DATABASE_URI']

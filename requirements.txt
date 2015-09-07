@@ -1,5 +1,6 @@
 alembic==0.7.7
 arrow==0.6.0
+awscli==1.8.1
 awsebcli==3.5.2
 blessed==1.9.5
 botocore==1.1.12
@@ -27,6 +28,7 @@ pathspec==0.3.3
 psutil==3.1.1
 psycopg2==2.6.1
 py4j==0.9
+pyasn1==0.1.8
 python-bcrypt==0.3.1
 python-dateutil==2.4.2
 pytz==2015.4
@@ -35,12 +37,14 @@ redis==2.10.3
 requests==2.6.2
 rq==0.5.4
 rq-dashboard==0.3.4
+rsa==3.1.4
 scipy==0.16.0
 simplejson==3.8.0
 six==1.9.0
 SQLAlchemy==1.0.8
 texttable==0.8.3
 times==0.7
+uWSGI==2.0.11.1
 wcwidth==0.1.4
 websocket-client==0.32.0
 Werkzeug==0.9.6

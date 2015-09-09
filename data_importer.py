@@ -6,7 +6,10 @@ import os
 
 class MovieImport(Command):
     def run(self):
-        with open("{}/ml-latest/movies.csv".format(os.environ["MOVIE_DATA_LOCATION"]), "r") as movie_file:
+        # if os.environ["APP_SETTINGS"] = "config.ProductionConfig"
+        if os.environ["APP_SETTINGS"] == "config.DevelopmentConfig":
+            file_path = "{}/ml-latest/movies.csv".format(os.environ["MOVIE_DATA_LOCATION"])
+        with open(file_path, "r") as movie_file:
             movie_reader = csv.reader(movie_file, delimiter=',')
             next(movie_reader, None) # Skip the header
             for movie in movie_reader:

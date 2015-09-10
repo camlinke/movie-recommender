@@ -37,15 +37,15 @@ if len(sys.argv) > 0:
     for arg in sys.argv:
         if arg == "large":
             raw_ratings = sc.textFile(large_ratings).repartition(num_partitions)
-            raw_movies = sc.textFile(large_movies)
+            # raw_movies = sc.textFile(large_movies)
         if arg == "small":
             raw_ratings = sc.textFile(small_ratings).repartition(num_partitions)
-            raw_movies = sc.textFile(small_movies)
+            # raw_movies = sc.textFile(small_movies)
         if arg[:3] == "id:":
             user_id = arg[3:]
 else:
     raw_ratings = sc.textFile(small_ratings).repartition(num_partitions)
-    raw_movies = sc.textFile(small_movies)
+    # raw_movies = sc.textFile(small_movies)
 
 fake_user_ratings = [(1, 5), (7, 3), (173, 2), (99, 1), (88, 5), (288, 5), (405, 3), (296, 5), (47, 5), (1432, 4)]
 user_seen_movies_list = [x[0] for x in fake_user_ratings]

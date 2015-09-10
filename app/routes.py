@@ -9,9 +9,14 @@ from delorean import Delorean
 import json
 import random
 import subprocess
+import os
 
 def get_recommendations_for_user(user_id):
-    subprocess.call(["spark-submit", "engine/engine.py", "small", "id:{}".format(user_id)])
+    if os.environ["APP_SETTINGS"] == "config.DevelopmentConfig":
+        subprocess.call(["spark-submit", "engine/engine.py", "small", "id:{}".format(user_id)])
+    else:
+        # TODO
+        pass
 
 @login_manager.user_loader
 def load_user(user_id):

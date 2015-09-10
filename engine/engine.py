@@ -20,13 +20,14 @@ if os.environ["APP_SETTINGS"] == "config.DevelopmentConfig":
     small_movies = os.path.join('file:/Users/camlinke/Dropbox/780/projects/movie-recommender/ml_data/ml-latest-small/movies.csv')
     large_movies = os.path.join('file:/Users/camlinke/Dropbox/780/projects/movie-recommender/ml_data/ml-latest/ratings.csv')
 else:
-    AWS_ACCESS_ID = os.environ['AWS_ACCESS_ID']
-    AWS_SECRET_KEY = os.environ['AWS_SECRET_KEY']
-    session = boto3.Session(aws_access_key_id=AWS_ACCESS_ID, aws_secret_access_key=AWS_SECRET_KEY)
-    s3 = session.resource('s3')
-    small_ratings = s3.Object('movie-recommender', 'ml_data/ml-latest-small/ratings.csv').get('ratings.csv')
-    # key = s3.get_bucket('media.yourdomain.com').get_key('examples/first_file.csv')
-    # key.get_contents_to_filename('/myfile.csv')
+    small_ratings = os.path.join('~/ratings.csv')
+    # AWS_ACCESS_ID = os.environ['AWS_ACCESS_ID']
+    # AWS_SECRET_KEY = os.environ['AWS_SECRET_KEY']
+    # session = boto3.Session(aws_access_key_id=AWS_ACCESS_ID, aws_secret_access_key=AWS_SECRET_KEY)
+    # s3 = session.resource('s3')
+    # small_ratings = s3.Object('movie-recommender', 'ml_data/ml-latest-small/ratings.csv').get('ratings.csv')
+    # # key = s3.get_bucket('media.yourdomain.com').get_key('examples/first_file.csv')
+    # # key.get_contents_to_filename('/myfile.csv')
 
 
 num_partitions = 2

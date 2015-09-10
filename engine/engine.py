@@ -126,11 +126,20 @@ def get_top_movies_for_user(user_ratings=fake_user_ratings, ratings_rdd=ratingsR
     return top_movies_for_user
 
 
-ratings = requests.get('http://localhost:5000/api/users/{}'.format(user_id)).json()['ratings']
-user_ratings = [(int(id), int(rating)) for id, rating in ratings if rating != 0]
-recommendations = {key: value for key, value in get_top_movies_for_user(user_ratings=user_ratings)}
-r = requests.post('http://localhost:5000/api/users/{}'.format(user_id), data=json.dumps({"recommendations" : recommendations}))
-print r.text
+if os.environ["APP_SETTINGS"] == "config.ProductionConfig":
+    ratings = requests.get('http://ec2-52-88-144-76.us-west-2.compute.amazonaws.com/api/users/{}'.format(user_id)).json()['ratings']
+    user_ratings = [(int(id), int(rating)) for id, rating in ratings if rating != 0]
+    recommendations = {key: value for key, value in get_top_movies_for_user(user_ratings=user_ratings)}
+    r = requests.post('http://ec2-52-88-144-76.us-west-2.compute.amazonaws.com/api/users/{}'.format(user_id), data=json.dumps({"recommendations" : recommendations}))
+    print r.text
+else:
+    ratings = requests.get('http://localhost:5000/api/users/{}'.format(user_id)).json()['ratings']
+    user_ratings = [(int(id), int(rating)) for id, rating in ratings if rating != 0]
+    recommendations = {key: value for key, value in get_top_movies_for_user(user_ratings=user_ratings)}
+    r = requests.post('http://localhost:5000/api/users/{}'.format(user_id), data=json.dumps({"recommendations" : recommendations}))
+    print r.text
+
+
 
 
 

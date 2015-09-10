@@ -13,6 +13,7 @@ import boto3
 
 sc = SparkContext()
 
+
 if os.environ["APP_SETTINGS"] == "config.DevelopmentConfig":
     small_ratings = os.path.join('file:/Users/camlinke/Dropbox/780/projects/movie-recommender/ml_data/ml-latest-small/ratings.csv')
     large_ratings = os.path.join('file:/Users/camlinke/Dropbox/780/projects/movie-recommender/ml_data/ml-latest/ratings.csv')

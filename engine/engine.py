@@ -23,7 +23,7 @@ else:
     AWS_ACCESS_ID = os.environ['AWS_ACCESS_ID']
     AWS_SECRET_KEY = os.environ['AWS_SECRET_KEY']
     session = boto3.Session(aws_access_key_id=AWS_ACCESS_ID, aws_secret_access_key=AWS_SECRET_KEY)
-    s3 = self.session.resource('s3')
+    s3 = session.resource('s3')
     small_ratings = s3.Object('movie-recommender', 'ml_data/ml-latest-small/ratings.csv').get('ratings.csv')
     # key = s3.get_bucket('media.yourdomain.com').get_key('examples/first_file.csv')
     # key.get_contents_to_filename('/myfile.csv')

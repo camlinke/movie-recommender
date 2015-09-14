@@ -15,7 +15,7 @@ def get_recommendations_for_user(user_id):
     if os.environ["APP_SETTINGS"] == "config.DevelopmentConfig":
         subprocess.call(["spark-submit", "engine/engine.py", "small", "id:{}".format(user_id)])
     else:
-        subprocess.call(["~/spark-1.5.0-bin-hadoop2.6/bin/spark-submit", "engine/engine.py", "small", "id:{}".format(user_id)], shell=True)
+        subprocess.call(["~/spark-1.5.0-bin-hadoop2.6/bin/spark-submit engine/engine.py small id:{}".format(user_id)], shell=True)
 
 @login_manager.user_loader
 def load_user(user_id):

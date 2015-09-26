@@ -2,6 +2,7 @@ from app import db
 from app import bcrypt
 from sqlalchemy.dialects.postgresql import JSON
 
+
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -35,6 +36,7 @@ class User(db.Model):
     def __repr__(self):
         return '<email %r>' % (self.email)
 
+
 class Movie(db.Model):
     __tablename__ = "movies"
 
@@ -53,6 +55,7 @@ class Movie(db.Model):
     def __repr__(self):
         return '<name %r>' % (self.name)
 
+
 class Genre(db.Model):
     __tablename__ = "genres"
 
@@ -67,6 +70,7 @@ class Genre(db.Model):
     def __repr__(self):
         return '<genre_name %r>' % (self.genre_name)
 
+
 class Rating(db.Model):
     __tablename__ = "ratings"
 
@@ -77,7 +81,8 @@ class Rating(db.Model):
     rating = db.Column(db.String(), nullable=False)
     timestamp = db.Column(db.String(), nullable=False)
 
-    def __init__(self, movie_id, rating, timestamp, user_id=None, movie_lense_user_id=None):
+    def __init__(self, movie_id, rating, timestamp,
+                 user_id=None, movie_lense_user_id=None):
         self.movie_id = movie_id
         self.rating = rating
         self.timestamp = timestamp

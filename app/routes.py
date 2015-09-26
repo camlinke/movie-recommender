@@ -33,6 +33,7 @@ def load_user(user_id):
 
 @login_manager.unauthorized_handler
 def unauthorized():
+    """Redirect unauthorized users to signup page"""
     return redirect(url_for('signup'))
 
 

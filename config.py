@@ -1,4 +1,6 @@
 import os
+
+
 class Config(object):
     DEBUG = False
     TESTING = False
@@ -12,8 +14,10 @@ class ProductionConfig(Config):
     SECRET_KEY = os.environ['SECRET_KEY']
     SQLALCHEMY_DATABASE_URI = os.environ['SQLALCHEMY_DATABASE_URI']
 
+
 class StagingConfig(Config):
     pass
+
 
 class DevelopmentConfig(Config):
     DEVELOPMENT = True

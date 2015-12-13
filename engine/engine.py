@@ -69,10 +69,15 @@ def similarities_for_user(user_id, crossRDD):
     """
     Takes in a user_id and and RDD of crossed user_ids with that user
     Returns an array of the top users who are most similar to a user.
+    Note - the consine similarity is subtracted from 1 to give us the top rated
+    users. With Cosine similarity the smaller the value the closer A and B are,
+    in this case we later rank the higher the simliarity score the closer it is
+    to the user, and we multiply that by their movie ratings to give us how much 
+    they could "like" the movie.
     """
     similarities = (crossRDD
                     .filter(lambda x: x[0][0] == user_id)
-                    .map(lambda x: (x[0][0], x[1][0], cosine_similarity(x[0][1], x[1][1]))))
+                    .map(lambda x: (x[0][0], x[1][0], 1 - cosine_similarity(x[0][1], x[1][1]))))
     return (similarities
             .filter(lambda x: x[0] == int(user_id)))
 
